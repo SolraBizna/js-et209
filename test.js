@@ -60,7 +60,7 @@ function generate_et_chime() {
     for(var n = 0; n < 32; ++n) generate_one_frame();
     // Pitch slide the center note of the chord up one semitone, ending up at
     // E major, over the course of 30 frames
-    for(var n = 0; n < 30; ++n) {
+    for(var n = 1; n <= 30; ++n) {
         apu.write_voice_rate(1, 267 + (n>>1));
         apu.write_voice_rate(4, 534 + n);
         generate_one_frame();
