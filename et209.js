@@ -124,7 +124,7 @@ function ET209() {
                 * FILTER_COEFFICIENT_LOWPASS;
             this._last_sample_lp = sample;
             // high-pass filter
-            sample = (this._last_sample_hp - sample)
+            sample = sample - (this._last_sample_hp - sample)
                 * FILTER_COEFFICIENT_HIGHPASS;
             this._last_sample_hp = sample;
             data[frame] = sample;
