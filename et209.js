@@ -39,8 +39,7 @@ function ET209() {
         }
         this._noise = {period:0,volume:0,lfsr:1,accumulator:0};
         this._sample_number = 0;
-        this._last_sample_lp = 0;
-        this._last_sample_hp = 0;
+        this._last_sample = 0;
     }
     var eval_waveform = function eval_waveform(accum, waveform) {
         var ret;
@@ -113,21 +112,16 @@ function ET209() {
         ++this._sample_number;
         return sample;
     }
-    var FILTER_COEFFICIENT_LOWPASS = Math.exp(-1/(ET209.SAMPLE_RATE*0.000024));
-    var FILTER_COEFFICIENT_HIGHPASS =Math.exp(-1/(ET209.SAMPLE_RATE*0.075));
+    var FILTER_COEFFICIENT = Math.exp(-1/(ET209.SAMPLE_RATE*0.000024));
     // Fills up an array or array-like object with samples, WITH filtering.
     this.generate_array = function generate_array(data, length) {
-        for(var frame = 0; frame < length; ++frame) {
+        for(var i = 0; i < length; ++i) {
             var sample = this.generate_sample() * (1/256);
             // low-pass filter
-            sample = sample + (this._last_sample_lp - sample)
-                * FILTER_COEFFICIENT_LOWPASS;
-            this._last_sample_lp = sample;
-            // high-pass filter
-            sample = sample - (this._last_sample_hp - sample)
-                * FILTER_COEFFICIENT_HIGHPASS;
-            this._last_sample_hp = sample;
-            data[frame] = sample;
+            sample = sample + (this._last_sample - sample)
+                * FILTER_COEFFICIENT;
+            this._last_sample = sample;
+            data[i] = sample;
         }
     }
     // Fills up an AudioBuffer with samples, WITH filtering. Assumes it is a
