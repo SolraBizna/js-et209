@@ -94,7 +94,7 @@ function ET209() {
         }
         var noise_sum = 0;
         if(this._noise.volume & ET209.VOLUME_RESET_FLAG) {
-            this._noise_volume &= ~ET209.VOLUME_RESET_FLAG;
+            this._noise.volume &= ~ET209.VOLUME_RESET_FLAG;
             this._noise.lfsr = 1;
         }
         for(var step = 0; step < 8; ++step) {
