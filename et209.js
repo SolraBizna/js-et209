@@ -31,13 +31,16 @@ function ET209() {
     this.write_noise_volume = function write_noise_volume(volume) {
         this._noise.volume = volume&255;
     }
+    this.write_noise_waveform = function write_noise_waveform(waveform) {
+        this._noise.waveform = waveform&255;
+    }
     this.reset = function reset() {
         this._voices = [];
         for(var n = 0; n < ET209.NUM_VOICES; ++n) {
             this._voices[n] = {target_rate:0,waveform:0,volume:0,
                                real_rate:0,accumulator:0};
         }
-        this._noise = {period:0,volume:0,lfsr:1,accumulator:0};
+        this._noise = {period:0,volume:0,lfsr:1,accumulator:0,waveform:0};
         this._sample_number = 0;
         this._last_sample = 0;
     }
@@ -99,9 +102,14 @@ function ET209() {
         }
         for(var step = 0; step < 8; ++step) {
             noise_sum += (this._noise.lfsr&1);
+            if(step != 7 && (this._noise.waveform & (1<<step))) continue;
             if(this._noise.accumulator == this._noise.period) {
                 this._noise.accumulator = 0;
-                var feedback = ((this._noise.lfsr>>1)^this._noise.lfsr)&1;
+                var feedback;
+                if(this._noise.waveform & 128)
+                    feedback = ((this._noise.lfsr>>6)^this._noise.lfsr)&1;
+                else
+                    feedback = ((this._noise.lfsr>>1)^this._noise.lfsr)&1;
                 this._noise.lfsr >>= 1;
                 if(feedback) this._noise.lfsr |= 16384;
             }
