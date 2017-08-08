@@ -84,7 +84,7 @@ function ET209() {
             if(shift_rate == 0)
                 voice.real_rate = actual_target_rate;
             else {
-                if((sample_number & ((1<<shift_rate<<2)-1)) == 0) {
+                if((this._sample_number & ((1<<shift_rate<<2)-1)) == 0) {
                     if(voice.real_rate < actual_target_rate) ++voice.real_rate;
                     else if(voice.real_rate > actual_target_rate)
                         --voice.real_rate;
