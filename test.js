@@ -9,26 +9,58 @@ else if(typeof(window.webkitAudioContext) !== 'undefined')
     audioContext = new window.webkitAudioContext();
 else alert("AudioContext is not supported, this page is broken");
 
-var apu, et_chime;
+var et_chimes = [];
 
-function generate_et_chime() {
-    if(apu == null) apu = new ET209();
-    // (note: the real chime is half as loud as this facsimile)
+function generate_et_chime(type) {
+    var apu = new ET209();
     var frames = [];
-    function generate_one_frame() {
-        var nuframe = new Float32Array(SAMPLES_PER_FRAME);
-        apu.generate_array(nuframe, SAMPLES_PER_FRAME);
-        frames.push(nuframe);
+    var generate_one_frame;
+    switch(type) {
+    case 1:
+        generate_one_frame = function generate_one_frame() {
+            var nuframe = new Float32Array(SAMPLES_PER_FRAME);
+            apu.generate_array(nuframe, SAMPLES_PER_FRAME);
+            frames.push([nuframe]);
+        }
+        break;
+    case 2:
+        generate_one_frame = function generate_one_frame() {
+            var nuframe_left = new Float32Array(SAMPLES_PER_FRAME);
+            var nuframe_right = new Float32Array(SAMPLES_PER_FRAME);
+            apu.generate_stereo_arrays(nuframe_left, nuframe_right,
+                                       SAMPLES_PER_FRAME);
+            frames.push([nuframe_left, nuframe_right]);
+        }
+        break;
+    case 3:
+        generate_one_frame = function generate_one_frame() {
+            var nuframe_left = new Float32Array(SAMPLES_PER_FRAME);
+            var nuframe_right = new Float32Array(SAMPLES_PER_FRAME);
+            apu.generate_headphone_arrays(nuframe_left, nuframe_right,
+                                          SAMPLES_PER_FRAME);
+            frames.push([nuframe_left, nuframe_right]);
+        }
+        break;
     }
     // mute all channels
     apu.write_noise_volume(ET209.VOLUME_RESET_FLAG);
     for(var n = 0; n < ET209.NUM_VOICES; ++n)
         apu.write_voice_volume(n, ET209.VOLUME_RESET_FLAG);
-    // For the chime, first three voices are sawtooth, next four are squares
+    // For the chime, first three voices are center sawtooths, next four are
+    // alternating left and right squares
+    // (the real chime doesn't pan)
     for(var n = 0; n < 3; ++n)
-        apu.write_voice_waveform(n, ET209.WAVEFORM_OUTPUT_ACCUMULATOR_FLAG);
-    for(var n = 3; n < 7; ++n)
-        apu.write_voice_waveform(n,ET209.WAVEFORM_TOGGLE_INVERT_ON_CARRY_FLAG);
+        apu.write_voice_waveform(n,
+                                 ET209.WAVEFORM_OUTPUT_ACCUMULATOR_FLAG
+                                 | ET209.WAVEFORM_PAN_CENTER);
+    for(var n = 3; n < 7; n += 2) {
+        apu.write_voice_waveform(n,
+                                 ET209.WAVEFORM_TOGGLE_INVERT_ON_CARRY_FLAG
+                                 | ET209.WAVEFORM_PAN_LEFT);
+        apu.write_voice_waveform(n+1,
+                                 ET209.WAVEFORM_TOGGLE_INVERT_ON_CARRY_FLAG
+                                 | ET209.WAVEFORM_PAN_RIGHT);
+    }
     // Set the frequencies for the chime
     // E minor chord
     apu.write_voice_rate(0, 224);
@@ -73,27 +105,34 @@ function generate_et_chime() {
         generate_one_frame();
     }
     // Okay, we've generated all the frames
-    et_chime = audioContext.createBuffer(1, frames.length * SAMPLES_PER_FRAME,
-                                         ET209.SAMPLE_RATE);
+    var et_chime = audioContext.createBuffer(type == 1 ? 1 : 2,
+                                             frames.length * SAMPLES_PER_FRAME,
+                                             ET209.SAMPLE_RATE);
+    et_chimes[type] = et_chime;
     if(et_chime.copyToChannel) {
-        for(var frame = 0; frame < frames.length; ++frame) {
-            et_chime.copyToChannel(frames[frame], 0, frame*800);
+        for(var channel = 0; channel < et_chime.numberOfChannels; ++channel) {
+            for(var frame = 0; frame < frames.length; ++frame) {
+                et_chime.copyToChannel(frames[frame][channel], channel,
+                                       frame*800);
+            }
         }
     }
     else {
-        var data = et_chime.getChannelData(0);
-        for(var frame = 0; frame < frames.length; ++frame) {
-            for(var n = 0; n < frames[frame].length; ++n) {
-                data[n+frame*SAMPLES_PER_FRAME] = frames[frame][n];
+        for(var channel = 0; channel < et_chime.numberOfChannels; ++channel) {
+            var data = et_chime.getChannelData(channel);
+            for(var frame = 0; frame < frames.length; ++frame) {
+                for(var n = 0; n < frames[frame].length; ++n) {
+                    data[n+frame*SAMPLES_PER_FRAME] =frames[frame][channel][n];
+                }
             }
         }
     }
 }
 
-function clicked() {
-    if(et_chime == null) generate_et_chime();
+function clicked(wat) {
+    if(et_chimes[wat] == null) generate_et_chime(wat);
     var node = audioContext.createBufferSource();
-    node.buffer = et_chime;
+    node.buffer = et_chimes[wat];
     node.connect(audioContext.destination);
     node.start();
 }
