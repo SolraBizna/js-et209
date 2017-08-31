@@ -7,10 +7,12 @@
   is 100% accurate, except that it assumes no writes to the register memory can
   occur mid-sample. This should have no noticeable effect on the output.
 
-  In the ARS, the ET209 is clocked at 6.1425MHz. It generates one output sample
-  per 128 clocks. Therefore, the correct sample rate to use is 47988.28125Hz.
-  It ends up generating 799.8046875 each frame. For most emulation purposes,
-  48000Hz and 800 samples per frame is "accurate enough".
+  In the ARS, the ET209 is clocked at 135MHz/22. It generates one output sample
+  per 128 clocks. Therefore, the correct sample rate to use is 135MHz/2816, or
+  about 47940Hz.
+
+  It ends up generating 798.28125 samples each frame. For most emulation
+  purposes, 48000Hz and 800 samples per frame is "accurate enough".
 
  */
 
@@ -276,4 +278,4 @@ ET209.WAVEFORM_PAN_RIGHT = 64;
 ET209.WAVEFORM_PAN_FULL = 192;
 ET209.VOLUME_MAX = 64;
 ET209.VOLUME_RESET_FLAG = 128;
-ET209.SAMPLE_RATE = 47988.28125;
+ET209.SAMPLE_RATE = 135000000/2816;
