@@ -1,0 +1,19 @@
+{
+  "name": "et209",
+  "version": "1.0.0",
+  "description": "An emulator for the (fictional) ET-209 digital synthesizer chip, in JavaScript for some reason",
+  "main": "et209.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SolraBizna/js-et209"
+  },
+  "author": "Solra Bizna <solra@bizna.name>",
+  "license": "Zlib",
+  "bugs": {
+    "url": "https://github.com/SolraBizna/js-et209/issues"
+  },
+  "homepage": "https://github.com/SolraBizna/js-et209#readme"
+}
