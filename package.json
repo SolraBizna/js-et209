@@ -1,6 +1,6 @@
 {
   "name": "et209",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An emulator for the (fictional) ET-209 digital synthesizer chip, in JavaScript for some reason",
   "main": "et209.js",
   "scripts": {

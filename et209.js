@@ -228,6 +228,7 @@
             if(this._last_left_delayed_sample == undefined) {
                 this._last_left_delayed_sample = 0;
                 this._last_right_delayed_sample = 0;
+                this._stereo_delay_pos = 0;
                 this._stereo_delay_buf_left = [];
                 this._stereo_delay_buf_right = [];
                 for(var n = 0; n < STEREO_DELAY_SAMPLE_COUNT; ++n) {
